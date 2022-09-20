@@ -1,0 +1,196 @@
+---
+title: "R Notebook"
+output: html_notebook
+date: "21/03/2021"
+Author: "Israel Usen"
+---
+
+#Data wrangling and exploration with multiple datasets
+Notes: setting up my R environment by loading the 'tidyverse', 'palmer penguins' and lots of other packages for my exploration.
+
+```{r}
+#loading the dplyr package
+library("dplyr")
+```
+
+
+```{r}
+# This is a dataset that's pre-installed in R
+data("ToothGrowth")
+View(ToothGrowth)
+
+```
+
+```{r}
+#only rows with a dose of 0.5 and is assigned to filtered_tg
+
+filtered_tg <- filter(ToothGrowth,dose==0.5)
+View(filtered_tg)
+```
+
+```{r}
+#sorting filtered_tg in ascending order using the len column
+arrange(filtered_tg, len)
+```
+
+```{r}
+#using a nested function to run the same code above, this makes the code to run from the inside out
+
+arrange(filter(ToothGrowth,dose==0.5),len)
+
+```
+
+```{r}
+#using a pipe i.e. %>% 
+filtered_toothgrowth <- ToothGrowth %>% 
+  filter(dose==0.5) %>% 
+  arrange(len)
+
+View(filtered_toothgrowth) #presto!
+
+```
+
+```{r}
+#to find the average length of tooth when the dose==0.5
+filtered_toothgrowth <- ToothGrowth %>% 
+  filter(dose==0.5) %>% 
+  group_by(supp) %>% 
+  na.omit() %>% #to remove na values
+  summarize(mean_len=mean(len))
+
+View(filtered_toothgrowth) #presto!!
+```
+
+```{r}
+#The diamonds dataset
+library("tidyverse")
+library(ggplot2)
+ 
+```
+
+```{r}
+#The diamonds dataset
+data("diamonds")
+View(diamonds)
+```
+
+```{r}
+mutate(diamonds, carat_2=carat*100) #this code adds a new column but doesn't affect the original dataframe
+```
+
+```{r}
+#creating plots for the diamonds dataset
+ggplot(data=diamonds)+
+  geom_bar(mapping=aes(x=color, fill=cut))+
+  facet_wrap(~cut) #this split the plots by cuts
+```
+
+```{r}
+#a basic bar chart
+ggplot(data=diamonds)+
+  geom_bar(mapping=aes(x=cut))
+```
+
+```{r}
+#a basic bar chart with colour 
+ggplot(data=diamonds)+
+  geom_bar(mapping=aes(x=cut, color= cut))
+```
+
+```{r}
+#a basic bar chart with colour fill mapped to cut
+ggplot(data=diamonds)+
+  geom_bar(mapping=aes(x=cut, fill= cut))
+```
+
+```{r}
+#a basic bar chart with colour fill mapped to clarity
+ggplot(data=diamonds)+
+  geom_bar(mapping=aes(x=cut, fill= clarity))
+  
+```
+
+```{r}
+#Anscombe's quartet: four datasets that have nearly identical summary statistics
+library('Tmisc')
+data(quartet)
+View(quartet)
+```
+
+```{r}
+#to calculate mean and corelation 
+quartet %>% 
+  group_by(set) %>% 
+  summarize(mean(x), sd(x), mean(y), sd(y), cor(x,y))
+#the mean for x is 9 and the mean for y is 7.5, the correlation shows that this data is identical, which can be misleading
+```
+
+```{r}
+#to plot graph and identify the difference
+ggplot(quartet, aes(x,y)) +
+  geom_point() +
+  geom_smooth(method=lm, se=FALSE) +
+  facet_wrap(~set) #this makes it plot for each set
+#from this graph, it is clear that there are differences between each of the sets.
+```
+
+```{r}
+#the datasauRus package create's plot with the Anscrombe data in different shapes
+library(datasauRus)
+
+```
+
+```{r}
+
+#creating a chart using the datasauRus package, using the Anscrombe dataset
+ggplot(datasaurus_dozen, aes(x=x, y=y, color=dataset )) +
+  geom_point() +
+  theme_void() +
+ # theme(legend.position = "none") +
+  facet_wrap(~dataset, ncol=4)
+# The trick to craeting these datasets is described in the paper by Justin Matejka and George Fitzmaurice "Same Stats, Different Graphs"
+
+#using the datasauRus package makes it easier to spot the difference between all the datasets
+```
+
+```{r}
+#Creating another plot using the datasauRus package
+ds = data.frame()
+for(j in 1:4){
+  ds = rbind( ds, data.frame( number = j , x = anscombe[, j], y = anscombe[,j+4]))
+}
+ggplot(ds, aes(x, y) ) + geom_point( color = "red", fill="red", shape=17) + facet_wrap(~number)
+
+#this shows plots for all four datasets
+```
+
+
+#using bias function it is present in a package called SimDesign
+#the bias function determines the average the actual outcome is greater than the predicetd outcome, this is done by comparing both the actual outcome and the predicted outcome.
+
+```{r}
+install.packages("SimDesign")
+library("SimDesign")
+```
+
+```{r}
+#assuming this are data from a local weather channel
+actual_temp<- c(68.3, 70, 72.4, 71, 67, 70) #assigning random values for sample test
+predicted_temp<- c(67.9, 69, 71.5, 70, 67, 69)
+
+bias(actual_temp, predicted_temp)
+#the result is 0.71 which makes it close to zero, but it seems biased towards lower temperatures this isn't as accurate as it should be.
+```
+
+```{r}
+#assuming this are data from a game store, that keeps record of how many games they sell on release day
+
+actual_sales<- c(150, 203, 137, 247, 116, 287)
+predicted_sales<- c(200, 300, 150, 250, 150,300)
+bias(actual_sales, predicted_sales)
+
+#this gave a -35, the predicted outcome is larger than the actual outcome, this means that they may have been ordering too much stocks for release days.
+```
+
+
+
