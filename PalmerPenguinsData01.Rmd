@@ -1,0 +1,284 @@
+---
+title: "Palmer Penguins Data Exploration"
+output: html_notebook
+date: "11/03/2021"
+---
+
+## Setting  up my environment
+Notes: setting up my R environment by loading the 'tidyverse', 'palmer penguins' and lots of other packages for my exploration.
+
+
+```{r loading packages}
+library('tidyverse')
+library("palmerpenguins")
+
+```
+
+# Data set was collected from 2007-2009 by Dr. Kristen Gorman of the palmer station
+
+#installing and calling our data analytic core package, which is the tidyverse.
+
+
+
+
+```{r}
+
+
+``` {r}
+#a view of PalmerPenguins
+View(penguins) #to look at my dataset
+
+summary(penguins) #to look at my dataset in summary
+
+skim_without_charts(penguins) #detailed and comprehensive view of my dataset
+
+glimpse(penguins) #this is a quick and simple look at my dataset.
+
+```
+
+
+```{r loading packages}
+library("here")
+library('skimr')
+library('janitor')
+library('dplyr')
+```
+
+
+```{r}
+penguins %>%  #use the pipes to introduce multiple code lines, without constantly calling the dataset
+  select (species) #this gives us only the species column
+```
+
+```{r}
+penguins %>% 
+  select(-species, -island) #this makes us select everything except this two columns
+
+```
+
+
+```{r}
+penguins %>% 
+  rename(island_new=island) #it makes us rename the column names, note this is temporary
+```
+
+
+```{r}
+
+rename_with(penguins, toupper) #this makes us change the column names to upper 
+```
+
+```{r}
+rename_with(penguins, tolower) #this makes us change the column names to upper lower case
+```
+
+```{r}
+
+clean_names(penguins) #this is part of the janitor package it ensures that there is only numbers, characters and underscores int he names.
+
+```
+
+
+
+#using the arrange group by and filter functions
+
+penguins %>% 
+  arrange(bill_length_mm) #this sorts the dataset in ascending order
+
+penguins %>% 
+  arrange(-bill_length_mm) #this sorts the dataset in descending order
+  
+```{r}
+penguins2<- penguins %>% arrange(-bill_length_mm) #this sorts the dataset in descending order and is assigned to penguins2
+
+View(penguins2)
+
+```
+  
+```{r}
+
+penguins %>% 
+  group_by(island) %>% 
+  #drop_na(palmerpenguins) %>% # ...this wasn't recognized by r, so it gave an error
+  na.omit() %>%  # this worked better, since the drop_na didn't work.
+  summarize(mean_bill_lengh_mm=mean(bill_depth_mm), max_bill_length_mm=max(bill_length_mm))
+#the code above used pipes to do the aggregate calculations using the summarize function and was grouped by island.
+#from this it is seen that the penguin with the maximum bill length lived in Biscoe island and the smallest in Torgersen island.
+```
+  
+
+```{r}
+penguins %>% 
+  filter(species=="Adelie") #this makes it easier to narrow down better
+```
+
+```{r}
+# to add a new columns
+penguins %>% 
+  mutate(body_mass_kg=body_mass_g/1000, flipper_length_m=flipper_length_mm/1000)
+
+```
+
+
+
+
+```{r }
+penguins02<-penguins %>% 
+  select(species,island, sex, year, flipper_length_mm) #assigning this to the variable name penguinso1
+
+penguins02 %>% 
+  group_by(island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(max_flipper_length_mm=max(flipper_length_mm)) %>% #to calculate the maximum bill length
+  arrange(-max_flipper_length_mm) #sorting in descending order
+#this code shows that the penguin with the longest flipper length, is male and stays in biscoe island in the year 2008
+```
+
+```{r}
+#the second way to do this was doing it directly, without having to assign any variables
+penguins %>% 
+  select(species,island, sex, year, flipper_length_mm) %>% 
+  group_by(island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(max_flipper_length_mm=max(flipper_length_mm)) %>% #to calculate the maximum bill length
+  arrange(-max_flipper_length_mm)
+```
+
+
+```{r}
+#to know which specie, sex, island and in what year of penguin has the maximum bill length 
+
+penguins %>% 
+  select(species,island, sex, year, bill_length_mm) %>% 
+  group_by(island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(max_bill_length_mm=max(bill_length_mm)) %>% #to calculate the maximum bill length
+  arrange(-max_bill_length_mm)
+
+#it is seen that the penguin with the max bill length, is male and stays in biscoe island in the year 2007 in descending order
+
+```
+
+
+```{r}
+#for min
+penguins %>% 
+  select(species,island, sex, year, bill_length_mm) %>% 
+  group_by(island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(min_bill_length_mm=min(bill_length_mm)) %>% #to calculate the maximum bill length
+  arrange(min_bill_length_mm) #in ascending order
+
+#it is seen that the penguin with the minimum bill length, is female and stays in Dream island in the year 2009 in ascending order
+```
+
+
+```{r}
+#to know which specie, sex, island and in what year of penguin has the maximum bill depth 
+
+penguins %>% 
+  select(species,island, sex, year, bill_depth_mm) %>% 
+  group_by(species, island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(max_bill_depth_mm=max(bill_depth_mm)) %>% #to calculate the maximum bill length
+  arrange(-max_bill_depth_mm) #in descending order
+#it is seen that the penguin with the maximum bill depth, is male and stays in Torgersen island in the year 2007 in descending order
+```
+
+
+```{r}
+#for minimum bill depth
+
+penguins %>% 
+  select(species,island, sex, year, bill_depth_mm) %>% 
+  group_by(species,island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(min_bill_depth_mm=min(bill_depth_mm)) %>% #to calculate the maximum bill length
+  arrange(min_bill_depth_mm) #in ascending order
+#it is seen that the penguin with the minimum bill depth, is female and stays in Biscoe island in the year 2007 in ascending order
+```
+
+
+```{r}
+#to know that with the largest body mass
+penguins %>% 
+  select(species,island, sex, year, body_mass_g) %>% 
+  group_by(species, island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(max_body_mass_g=max(body_mass_g)) %>% #to calculate the maximum bill length
+  arrange(-max_body_mass_g) #in descending order
+#it is seen that the penguin with the largest body mass in grams, is male and stays in Biscoe island in the year 2007 and is a Gentoo in descending order
+```
+
+
+```{r}
+#to know that with the smallest body mass
+penguins %>% 
+  select(species,island, sex, year, body_mass_g) %>% 
+  group_by(species, island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(min_body_mass_g=min(body_mass_g)) %>% #to calculate the maximum bill length
+  arrange(min_body_mass_g) #in ascending order
+#it is seen that the penguin with the smallest body mass in grams, is female and stays in Dream island in the year 2008 and is a Chinstrap in ascending order
+```
+
+
+```{r}
+#to know that with the smallest body mass in the year 2007 only
+penguins %>% 
+  select(species,island, sex, year, body_mass_g) %>% 
+  group_by(species, island, sex, year) %>% 
+  na.omit() %>% #to remove all na values.
+  summarize(min_body_mass_g=min(body_mass_g)) %>% #to calculate the maximum bill length
+  filter(year==2007) %>% 
+  arrange(min_body_mass_g) #in ascending order
+#in the year 2007, a female penguin on Dream island of the chinstrap specie had the smallest body mass
+```
+
+
+```{r}
+# let plot graphs with our data sets using ggplot2 package
+
+library("ggplot2")
+```
+
+
+
+```{r message=FALSE, warning=FALSE}
+#body mass vs flipper length
+ggplot(data=penguins)+
+  geom_point(mapping=aes(x=flipper_length_mm, y=body_mass_g, 
+                         shape=species, colour=species))+ #this shows that the gentoo species have the largest body mass and flipper lenght, and the chinstrap the smallet, this buttresses my previous exploration 
+  geom_smooth(mapping=aes(x=flipper_length_mm, y=body_mass_g))+ #this shows a positive correlation between body mass and flipper lenght
+  labs(title="Palmer Penguins: Body Mass VS. Flipper Length", subtitle = "Sample of Three Penguins Species",
+       caption="Data collected by Dr. Kristen Gorman")
+#from the plot it shows that the Gentoo are the largest specie in body mass and flipper lenght. This buttresses our previous exploration and there is a positive correlation between the two plots
+```
+
+
+```{r message=FALSE, warning=FALSE}
+#body mass vs flipper length
+ggplot(data=penguins)+
+  geom_smooth(mapping=aes(x=flipper_length_mm, y=body_mass_g))+
+  annotate("text", x=220,y=3500, label="There's a positive correlation", color="purple",
+            fontface="bold", size=3.5, angle=15)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+#body mass vs flipper length to show for each specie
+ggplot(data=penguins)+
+  geom_smooth(mapping=aes(x=flipper_length_mm, y=body_mass_g, linetype=species))
+```
+
+
+```{r message=FALSE, warning=FALSE}
+#body mass vs flipper length to show for each specie, using the facet grid for each plot
+ggplot(data=penguins)+
+  geom_point(mapping=aes(x=flipper_length_mm, y=body_mass_g, shape=species, colour=species))+ #this shows that the gentoo species have the largest body mass and flipper lenght, and the chinstrap the smallet, this buttresses my previous exploration 
+  facet_grid(sex~species)
+
+```
+
+
+
